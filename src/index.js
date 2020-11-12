@@ -77,7 +77,7 @@ async function receivedDigits(event) {
                 muteAttendeesAction.Parameters.MeetingId = meeting[0].meetingId.S;
                 muteAttendeesAction.Parameters.AttendeeIds = mapAttendee;
 
-                playAudioAction.Parameters.AudioSource.Key = "muted.wav";
+                playAudioAction.Parameters.AudioSource.Key = "mute_all.wav";
                 return [muteAttendeesAction, playAudioAction];
             }
             
@@ -96,7 +96,7 @@ async function receivedDigits(event) {
                 unmuteAttendeesAction.Parameters.MeetingId = meeting[0].meetingId.S;
                 unmuteAttendeesAction.Parameters.AttendeeIds = mapAttendee;
 
-                playAudioAction.Parameters.AudioSource.Key = "unmuted.wav";
+                playAudioAction.Parameters.AudioSource.Key = "unmute_all.wav";
                 return [unmuteAttendeesAction, playAudioAction];
             }
             
