@@ -75,7 +75,7 @@ async function receivedDigits(event) {
 
             if (mapAttendee.length != 0) {
                 muteAttendeesAction.Parameters.MeetingId = meeting[0].meetingId.S;
-                muteAttendeesAction.Parameters.AttendeeIds = mapAttendee;
+                muteAttendeesAction.Parameters.AttendeeList = mapAttendee;
 
                 playAudioAction.Parameters.AudioSource.Key = "mute_all.wav";
                 return [muteAttendeesAction, playAudioAction];
@@ -94,7 +94,7 @@ async function receivedDigits(event) {
 
             if (mapAttendee.length != 0) {
                 unmuteAttendeesAction.Parameters.MeetingId = meeting[0].meetingId.S;
-                unmuteAttendeesAction.Parameters.AttendeeIds = mapAttendee;
+                unmuteAttendeesAction.Parameters.AttendeeList = mapAttendee;
 
                 playAudioAction.Parameters.AudioSource.Key = "unmute_all.wav";
                 return [unmuteAttendeesAction, playAudioAction];
@@ -108,7 +108,7 @@ async function receivedDigits(event) {
             var attendee = await getAttendeeInfo(fromNumber, callId);
 
             muteAttendeesAction.Parameters.MeetingId = attendee[0].meetingId.S;
-            muteAttendeesAction.Parameters.AttendeeIds = [attendee[0].attendeeId.S];
+            muteAttendeesAction.Parameters.AttendeeList = [attendee[0].attendeeId.S];
 
             playAudioAction.Parameters.AudioSource.Key = "muted.wav";
             return [muteAttendeesAction, playAudioAction];
@@ -118,7 +118,7 @@ async function receivedDigits(event) {
             var attendee = await getAttendeeInfo(fromNumber, callId);
 
             unmuteAttendeesAction.Parameters.MeetingId = attendee[0].meetingId.S;
-            unmuteAttendeesAction.Parameters.AttendeeIds = [attendee[0].attendeeId.S];
+            unmuteAttendeesAction.Parameters.AttendeeList = [attendee[0].attendeeId.S];
 
             playAudioAction.Parameters.AudioSource.Key = "unmuted.wav";
             return [unmuteAttendeesAction, playAudioAction];
@@ -148,7 +148,7 @@ async function actionSuccessful(event) {
             const attendee = await chime.createAttendee({ MeetingId: meeting.Meeting.MeetingId, ExternalUserId: from }).promise();
             console.log("attendee details:" + JSON.stringify(attendee, null, 2));
 
-            await updateAttendee(event, attendee.Attendee.AttendeeId);
+            await updateAttendee(event, meeting.Meeting.MeetingId, attendee.Attendee.AttendeeId);
 
             // Return join meeting action to bridge user to meeting
             joinChimeMeetingAction.Parameters.JoinToken = attendee.Attendee.JoinToken;
@@ -231,7 +231,7 @@ async function getMeetingInfo(fromNumber, callId) {
     return attendees.Items;
 }
 
-async function updateAttendee(event, attendeeId) {
+async function updateAttendee(event, meetingId, attendeeId) {
     // update attendee in Dynamo DB
     var params = {
         TableName: process.env.TABLE_NAME,
@@ -241,7 +241,7 @@ async function updateAttendee(event, attendeeId) {
         },
         UpdateExpression: 'set meetingId = :meetingId, attendeeId = :attendeeId',
         ExpressionAttributeValues: {
-            ':meetingId': { 'S': event.ActionData.ReceivedDigits },
+            ':meetingId': { 'S': meetingId },
             ':attendeeId': { 'S': attendeeId }
         },
         ReturnValues: "ALL_NEW"
@@ -346,7 +346,7 @@ const muteAttendeesAction = {
     "Parameters": {
         "Operation": "Mute",
         "MeetingId": "meeting-id",
-        "AttendeeIds": ""
+        "AttendeeList": ""
     }
 };
 
@@ -355,6 +355,6 @@ const unmuteAttendeesAction = {
     "Parameters": {
         "Operation": "Unmute",
         "MeetingId": "meeting-id",
-        "AttendeeIds": ""
+        "AttendeeList": ""
     }
 };
