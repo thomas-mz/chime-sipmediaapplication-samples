@@ -21,9 +21,9 @@ Amazon Chime SIP Media Application (SMA) provides PSTN calling support for the A
 ## Setup
 
 ### 1. Prerequisites
-- [AWS Command Line Interface](https://aws.amazon.com/cli/) in installed
-- Repo is cloned
-- You have permission to access Amazon Chime Administration Console
+- Install [AWS Command Line Interface](https://aws.amazon.com/cli/)
+- Clone the repo
+- Get permission to Amazon Chime Administration Console
 
 ### 2. Lambda deployment
 Zip you lambda function.
