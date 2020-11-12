@@ -140,7 +140,7 @@ Resources:
         Ref: FunctionNameParameter
       Handler: index.handler
       Runtime: nodejs12.x
-      CodeUri: ./function.zip
+      CodeUri: ../function.zip
       Role: !GetAtt FunctionRole.Arn
       Environment:
         Variables:
