@@ -61,7 +61,6 @@ async function newCall(event) {
 // New call handler
 async function receivedDigits(event) {
     // Last action was ReceiveDigits
-
     const fromNumber = event.CallDetails.Participants[0].From;
     const callId = event.CallDetails.Participants[0].CallId;
 
