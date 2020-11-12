@@ -53,7 +53,13 @@ Deploy the lambda
 aws cloudformation deploy --template-file packaged.yaml --stack-name SIPMediaAppSample --region us-east-1 --capabilities CAPABILITY_IAM
 ```
 
-### 3. Setup SIP Media Application
+### 3. Copy audio files to S3 bucket
+Zip you lambda function.
+```
+aws s3 cp ./resources/ s3://<bucketName>/ --recursive --exclude "*" --include "*.wav"
+```
+
+### 4. Setup SIP Media Application
 - Follow Amazon Chime Admin guide to create SIP Media Application and SIP Rule
 
 ## Security
