@@ -344,8 +344,9 @@ const receiveDigitsAction = {
 const muteAttendeesAction = {
     "Type": "ModifyChimeMeetingAttendees",
     "Parameters": {
+        "ParticipantTag": "LEG-B",
         "Operation": "Mute",
-        "MeetingId": "meeting-id",
+        "MeetingId": "",
         "AttendeeList": ""
     }
 };
@@ -353,8 +354,9 @@ const muteAttendeesAction = {
 const unmuteAttendeesAction = {
     "Type": "ModifyChimeMeetingAttendees",
     "Parameters": {
+        "ParticipantTag": "LEG-B",
         "Operation": "Unmute",
-        "MeetingId": "meeting-id",
+        "MeetingId": "",
         "AttendeeList": ""
     }
 };
