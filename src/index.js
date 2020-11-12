@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB({ region: process.env.AWS_REGION });
 const chime = new AWS.Chime({ region: 'us-east-1', endpoint: 'service.chime.aws.amazon.com' });
 
-exports.handler = async(event, context, callback) => {
+exports.handler = async (event, context, callback) => {
     console.log("Lambda is invoked with calldetails:" + JSON.stringify(event));
     let actions;
 
@@ -29,8 +29,9 @@ exports.handler = async(event, context, callback) => {
         case "HANGUP":
             // on hangup
             console.log("HANGUP ACTION");
-            if(event.CallDetails.Participants[0].Status === "Disconnected")
-            await deleteAttendee(event);
+            if (event.CallDetails.Participants[0].Status === "Disconnected") {
+                await deleteAttendee(event);
+            }
             actions = [];
             break;
 
@@ -80,7 +81,7 @@ async function receivedDigits(event) {
                 playAudioAction.Parameters.AudioSource.Key = "mute_all.wav";
                 return [muteAttendeesAction, playAudioAction];
             }
-            
+
             // no other attendee nothing to do
             return [];
 
@@ -99,7 +100,7 @@ async function receivedDigits(event) {
                 playAudioAction.Parameters.AudioSource.Key = "unmute_all.wav";
                 return [unmuteAttendeesAction, playAudioAction];
             }
-            
+
             // no other attendee nothing to do
             return [];
 
