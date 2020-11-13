@@ -10,24 +10,25 @@ exports.handler = async (event, context, callback) => {
     switch (event.InvocationEventType) {
         case "NEW_INBOUND_CALL":
             console.log("INBOUND");
-            // new inbound call
+            // New inbound call
             actions = await newCall(event);
             break;
 
         case "DIGITS_RECEIVED":
             console.log("RECEIVED DIGITS ACTIONS");
-            // new inbound call
+            // In-Call DTMF (digtis) detected
             actions = await receivedDigits(event);
             break;
 
         case "ACTION_SUCCESSFUL":
-            // on action successful
+            // Action from the previous invocation response 
+            // or a action requiring callback was successful
             console.log("SUCCESS ACTION");
             actions = await actionSuccessful(event);
             break;
 
         case "HANGUP":
-            // on hangup
+            // Hangup received
             console.log("HANGUP ACTION");
             if (event.CallDetails.Participants[0].Status === "Disconnected") {
                 await deleteAttendee(event);
@@ -36,7 +37,7 @@ exports.handler = async (event, context, callback) => {
             break;
 
         default:
-            // on error lets end the call
+            // Action unsuccessful or unknown event recieved
             console.log("FAILED ACTION");
             actions = [hangupAction];
     }
@@ -173,7 +174,7 @@ async function actionSuccessful(event) {
 async function getAttendeeInfo(fromNumber, callId) {
     console.log("Querying using fromNumber");
 
-    params = {
+    let params = {
         TableName: process.env.TABLE_NAME,
         KeyConditionExpression: 'fromNumber = :fromNumber and callId = :callId',
         ExpressionAttributeValues: {
@@ -196,7 +197,7 @@ async function getAttendeeInfo(fromNumber, callId) {
 async function getMeetingInfo(fromNumber, callId) {
     console.log("Querying using fromNumber");
 
-    params = {
+    let params = {
         TableName: process.env.TABLE_NAME,
         KeyConditionExpression: 'fromNumber = :fromNumber and callId = :callId',
         ExpressionAttributeValues: {
@@ -212,7 +213,7 @@ async function getMeetingInfo(fromNumber, callId) {
         return null;
     }
 
-    var params = {
+    params = {
         TableName: process.env.TABLE_NAME,
         IndexName: 'meetingIdIndex',
         KeyConditionExpression: 'meetingId = :meetingId',
@@ -233,7 +234,7 @@ async function getMeetingInfo(fromNumber, callId) {
 
 async function updateAttendee(event, meetingId, attendeeId) {
     // update attendee in Dynamo DB
-    var params = {
+    let params = {
         TableName: process.env.TABLE_NAME,
         Key: {
             'fromNumber': { 'S': event.CallDetails.Participants[0].From },
@@ -259,7 +260,7 @@ async function updateAttendee(event, meetingId, attendeeId) {
 
 async function deleteAttendee(event) {
     // delete attendee from Dynamo DB
-    var params = {
+    let params = {
         TableName: process.env.TABLE_NAME,
         Key: {
             'fromNumber': { 'S': event.CallDetails.Participants[0].From },
