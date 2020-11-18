@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB({ region: process.env.AWS_REGION });
 const chime = new AWS.Chime({ region: 'us-east-1', endpoint: 'service.chime.aws.amazon.com' });
 
-exports.handler = async (event, context, callback) => {
+exports.handler = async(event, context, callback) => {
     console.log("Lambda is invoked with calldetails:" + JSON.stringify(event));
     let actions;
 
@@ -78,8 +78,7 @@ async function receivedDigits(event) {
                 muteAttendeesAction.Parameters.MeetingId = meeting[0].meetingId.S;
                 muteAttendeesAction.Parameters.AttendeeList = mapAttendee;
 
-                playAudioAction.Parameters.AudioSource.Key = "mute_all.wav";
-                return [muteAttendeesAction, playAudioAction];
+                return [muteAttendeesAction];
             }
 
             // no other attendee nothing to do
@@ -97,8 +96,7 @@ async function receivedDigits(event) {
                 unmuteAttendeesAction.Parameters.MeetingId = meeting[0].meetingId.S;
                 unmuteAttendeesAction.Parameters.AttendeeList = mapAttendee;
 
-                playAudioAction.Parameters.AudioSource.Key = "unmute_all.wav";
-                return [unmuteAttendeesAction, playAudioAction];
+                return [unmuteAttendeesAction];
             }
 
             // no other attendee nothing to do
@@ -111,8 +109,7 @@ async function receivedDigits(event) {
             muteAttendeesAction.Parameters.MeetingId = attendee[0].meetingId.S;
             muteAttendeesAction.Parameters.AttendeeList = [attendee[0].attendeeId.S];
 
-            playAudioAction.Parameters.AudioSource.Key = "muted.wav";
-            return [muteAttendeesAction, playAudioAction];
+            return [muteAttendeesAction];
 
         case "*8":
             // Unmute
@@ -121,8 +118,7 @@ async function receivedDigits(event) {
             unmuteAttendeesAction.Parameters.MeetingId = attendee[0].meetingId.S;
             unmuteAttendeesAction.Parameters.AttendeeList = [attendee[0].attendeeId.S];
 
-            playAudioAction.Parameters.AudioSource.Key = "unmuted.wav";
-            return [unmuteAttendeesAction, playAudioAction];
+            return [unmuteAttendeesAction];
 
         default:
             return [];
@@ -132,13 +128,15 @@ async function receivedDigits(event) {
 // Action successful handler
 async function actionSuccessful(event) {
     console.log("ACTION_SUCCESSFUL");
-
+    
+    const fromNumber = event.CallDetails.Participants[0].From;
+    const callId = event.CallDetails.Participants[0].CallId;
+    
     switch (event.ActionData.Type) {
         case "PlayAudioAndGetDigits":
             // Last action was PlayAudioAndGetDigits
             console.log("Join meeting using Meeting id");
-
-            const from = event.CallDetails.Participants[0].From;
+            
             const meetingId = event.ActionData.ReceivedDigits;
 
             // Get/create meeting
@@ -146,7 +144,7 @@ async function actionSuccessful(event) {
             console.log("meeting details:" + JSON.stringify(meeting, null, 2));
 
             // Get/create attendee
-            const attendee = await chime.createAttendee({ MeetingId: meeting.Meeting.MeetingId, ExternalUserId: from }).promise();
+            const attendee = await chime.createAttendee({ MeetingId: meeting.Meeting.MeetingId, ExternalUserId: fromNumber }).promise();
             console.log("attendee details:" + JSON.stringify(attendee, null, 2));
 
             await updateAttendee(event, meeting.Meeting.MeetingId, attendee.Attendee.AttendeeId);
@@ -163,6 +161,38 @@ async function actionSuccessful(event) {
             playAudioAction.Parameters.AudioSource.Key = "meeting_joined.wav";
             return [receiveDigitsAction, playAudioAction];
 
+        case "ModifyChimeMeetingAttendees":
+            switch (event.ActionData.Parameters.Operation) {
+                case "Mute":
+                    var a = await getAttendeeInfo(fromNumber, callId);
+                    
+                    if (event.ActionData.Parameters.AttendeeList.includes(a[0].attendeeId.S)) {
+                        // Mute
+                        playAudioAction.Parameters.AudioSource.Key = "muted.wav";
+                    }
+                    else {
+                        // Mute All
+                        playAudioAction.Parameters.AudioSource.Key = "mute_all.wav";
+                    }
+                    return [playAudioAction];
+
+                case "Unmute":
+                    var a = await getAttendeeInfo(fromNumber, callId);
+                    if (event.ActionData.Parameters.AttendeeList.includes(a[0].attendeeId.S)) {
+                        // Unmute
+                        playAudioAction.Parameters.AudioSource.Key = "unmuted.wav";
+                    }
+                    else {
+                        // Unmute All
+                        playAudioAction.Parameters.AudioSource.Key = "unmute_all.wav";
+                    }
+
+                    return [playAudioAction];
+            }
+            
+        case "PlayAudio":
+            return [];
+            
         case "ReceiveDigits":
             return [];
 
