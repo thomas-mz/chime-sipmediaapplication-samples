@@ -43,7 +43,7 @@ aws s3api create-bucket --bucket source-us-east-1-<accountid> --region us-east-1
 
 Package local artifacts
 ```
-aws cloudformation package --template-file ./infrastructre/deployment-template.yaml --s3-bucket source-us-east-1-<accountid> --force-upload --output-template-file packaged.yaml
+aws cloudformation package --template-file ./infrastructure/deployment-template.yaml --s3-bucket source-us-east-1-<accountid> --force-upload --output-template-file packaged.yaml
 ```
 
 Deploy the lambda
