@@ -26,7 +26,7 @@ Amazon Chime SIP Media Application (SMA) provides PSTN calling support for the A
 - Get permission to Amazon Chime Administration Console
 
 ### 2. Lambda deployment
-Zip you lambda function.
+Zip your lambda function.
 ```
 zip function.zip ./src/index.js -j
 ```
@@ -47,14 +47,14 @@ aws cloudformation package --template-file ./infrastructre/deployment-template.y
 ```
 
 Deploy the lambda
-> :warning: **use --parameter-overrides BucketNamePrefixParameter=<string> TableNameParameter=<string> FunctionNameParameter=<string> to overried default values**
+> :warning: **use --parameter-overrides BucketNamePrefixParameter=<string> TableNameParameter=<string> FunctionNameParameter=<string> to override default values**
 
 ```
 aws cloudformation deploy --template-file packaged.yaml --stack-name SIPMediaAppSample --region us-east-1 --capabilities CAPABILITY_IAM
 ```
 
 ### 3. Copy audio files to S3 bucket
-> :warning: **You can find the bucket name from AWS S3 Console**
+> :warning: **You can find the bucket name from the AWS S3 Console**
 ```
 aws s3 cp ./resources/ s3://<bucketName>/ --recursive --exclude "*" --include "*.wav" --no-guess-mime-type --content-type="audio/wav" 
 ```
