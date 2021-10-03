@@ -39,7 +39,7 @@ exports.handler = async(event, context, callback) => {
         default:
             // Action unsuccessful or unknown event recieved
             console.log("FAILED ACTION");
-            actions = [hangupAction];
+            actions = [];
     }
 
     const response = {
